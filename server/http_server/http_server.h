@@ -7,10 +7,16 @@ namespace http {
     class HTTPServer {
         private:
             struct sockaddr * sockaddr;
+            struct sockaddr * external_sockaddr;
+
             struct sockaddr_in sockadd_in;
+            struct sockaddr_in external_sockadd_in;
 
             socklen_t * sockaddr_len;
+            
             int server_socket;
+            int enable_sockets;
+
             void get_error_message();
             void show_binded_socket_info();
 
@@ -23,6 +29,7 @@ namespace http {
             void start_server();
             void bind_server();
             void create_listener();
+            void accept_pending_connections();
     };
 };
 

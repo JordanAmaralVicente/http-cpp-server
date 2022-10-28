@@ -23,7 +23,9 @@ namespace http {
         memset(&(sock_address.sin_zero), '\0', 8);
 
         this->sockadd_in = sock_address;
+
         this->sockaddr = (struct sockaddr *) &sock_address;
+        this->external_sockaddr = (struct sockaddr *) &this->external_sockadd_in;
 
         this->sockaddr_len = (socklen_t *) sizeof(this->sockaddr);
     }
@@ -63,6 +65,21 @@ namespace http {
 
         if (listerner_result < 0) {
             this->get_error_message();
+        }
+    }
+
+    void HTTPServer::accept_pending_connections() {
+        socklen_t sin_size = sizeof(struct sockaddr_in);
+        
+        int acception_result = accept(
+            this->server_socket,
+            this->external_sockaddr,
+            &sin_size
+        );
+
+        if (acception_result < 0) {
+            this->get_error_message();
+            return;
         }
     }
 

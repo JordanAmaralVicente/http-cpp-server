@@ -12,7 +12,9 @@ int main() {
     server.bind_server();
     server.create_listener();
 
-    while (1) {}
+    while (1) {
+        server.accept_pending_connections();
+    }
 
     return 0;
 }
