@@ -3,7 +3,13 @@
 #include "http_client/http_client.h"
 
 int main(){
-    http::HTTPClient client = http::HTTPClient(9091);
+    std::string address;
+    int port;
+
+    std::cout << "Porta: "; std::cin >> port;
+    std::cout << "Endereço: "; std::cin >> address;
+
+    http::HTTPClient client = http::HTTPClient((char *)address.c_str(), port);
 
     client.setup_socket();
     client.connect_socket();

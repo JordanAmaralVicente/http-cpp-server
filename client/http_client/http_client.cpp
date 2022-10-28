@@ -12,8 +12,9 @@
 #define GETSOCKETERRNO() (errno)
 
 namespace http {
-    HTTPClient::HTTPClient(int port) {
+    HTTPClient::HTTPClient(char * addr, int port) {
         this->host_port = port;
+        this->host_addr = addr;
     }
 
     HTTPClient::~HTTPClient() {
@@ -39,7 +40,7 @@ namespace http {
 
         dest_addr.sin_family = AF_INET;
         dest_addr.sin_port = htons(9091);
-        dest_addr.sin_addr.s_addr = inet_addr("192.168.18.83");
+        dest_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
         memset(&(dest_addr.sin_zero), '\0', 8);
 
         int connection_result = connect(

@@ -9,7 +9,7 @@ namespace http {
             char* host_addr;
 
         public:
-            HTTPClient(int port);
+            HTTPClient(char * addr, int port);
             ~HTTPClient();
 
             void setup_socket();
