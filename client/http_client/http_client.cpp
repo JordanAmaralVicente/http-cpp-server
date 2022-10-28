@@ -16,6 +16,10 @@ namespace http {
         this->host_port = port;
     }
 
+    HTTPClient::~HTTPClient() {
+        this->close_connection();
+    }
+
     void HTTPClient::get_error_message() {
         std::cout << "Something went wrong" << std::endl;
         std::cout << "ERRNO: " << GETSOCKETERRNO() << std::endl;
@@ -63,5 +67,16 @@ namespace http {
         }
         
         std::cout << "Bytes sent: " << bytes_sent << std::endl;
+    }
+
+    void HTTPClient::close_connection() {
+        int shutdown_result = shutdown(this->socket_client, SHUT_RDWR);
+
+        if (shutdown_result < 0) {
+            this->get_error_message();
+            return;
+        }
+
+        std::cout << "Connection closed successfuly" << std::endl;
     }
 };

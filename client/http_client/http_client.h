@@ -10,10 +10,12 @@ namespace http {
 
         public:
             HTTPClient(int port);
-           
+            ~HTTPClient();
+
             void setup_socket();
             void connect_socket();
             void get_error_message();
+            void close_connection();
 
             void send_message(char * message);
     };

@@ -22,6 +22,7 @@ namespace http {
 
         public:
             HTTPServer(int port, int max_connections);
+            ~HTTPServer();
             
             int server_port;
             int max_connections;
@@ -30,6 +31,7 @@ namespace http {
             void bind_server();
             void create_listener();
             void accept_pending_connections();
+            void close_connection();
     };
 };
 

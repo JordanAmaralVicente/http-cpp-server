@@ -30,6 +30,10 @@ namespace http {
         this->sockaddr_len = (socklen_t *) sizeof(this->sockaddr);
     }
 
+    HTTPServer::~HTTPServer() {
+        this->close_connection();
+    }
+
     void HTTPServer::get_error_message() {
         std::cout << "Something went wrong" << std::endl;
         std::cout << "ERRNO: " << GETSOCKETERRNO() << std::endl;
@@ -102,5 +106,15 @@ namespace http {
         
         std::cout << "Ip Address: " << server_ip_address << std::endl;
         std::cout << "Port: " << server_port << std::endl; 
+    }
+
+    void HTTPServer::close_connection() {
+        int shutdown_result = shutdown(this->server_socket, SHUT_RDWR);
+
+        if (shutdown_result < 0) {
+            this->get_error_message();
+        }
+
+        std::cout << "Connection closed sucessfuly" << std::endl;
     }
 };
