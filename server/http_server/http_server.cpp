@@ -11,8 +11,9 @@
 #define GETSOCKETERRNO() (errno)
 
 namespace http {
-    HTTPServer::HTTPServer(int port) {
+    HTTPServer::HTTPServer(int port, int max_connections) {
         this->server_port = port;
+        this->max_connections = max_connections;
     }
 
     void HTTPServer::get_error_message() {
@@ -64,4 +65,12 @@ namespace http {
         std::cout << "Ip Address: " << server_ip_address << std::endl;
         std::cout << "Port: " << server_port << std::endl; 
 	}
+
+    void HTTPServer::create_listener() {
+        int listerner_result = listen(this->server_socket, this->max_connections);
+
+        if (listerner_result < 0) {
+            this->get_error_message();
+        }
+    }
 };
