@@ -9,9 +9,7 @@ int main() {
     server.start_server();
     server.bind_server();
 
-    while (1) {
-        
-    }
+    while (1) {}
 
     return 0;
 }

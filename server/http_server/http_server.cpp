@@ -8,17 +8,24 @@
 
 #include "http_server.h"
 
+#define GETSOCKETERRNO() (errno)
+
 namespace http {
     HTTPServer::HTTPServer(int port) {
         this->server_port = port;
+    }
+
+    void HTTPServer::get_error_message() {
+        std::cout << "Something went wrong" << std::endl;
+        std::cout << "ERRNO: " << GETSOCKETERRNO() << std::endl;
+        std::cout << "message: " << strerror(GETSOCKETERRNO()) << std::endl;
     }
 
     void HTTPServer::start_server() {
         this->server_socket = socket(AF_INET, SOCK_STREAM, 0);
 
         if (this->server_socket < 0) {
-            std::cout << "Couldn't stablish a connection";
-            std::cout << "ERRNO: " << this->server_socket << std::endl;
+            this->get_error_message();
         }
     }
 
@@ -27,7 +34,7 @@ namespace http {
 
         socket_address.sin_family = AF_INET;
         socket_address.sin_port = htons(this->server_port);
-        socket_address.sin_addr.s_addr = inet_addr(INADDR_ANY);
+        socket_address.sin_addr.s_addr = inet_addr("192.168.18.83");
         memset(&(socket_address.sin_zero), '\0', 8);
 
         int bind_response = bind(
@@ -37,11 +44,24 @@ namespace http {
         );
 
         if (bind_response < 0) {
-            std::cout << "Couldn't bind socket address";
-            std::cout << "ERRNO: " << bind_response << std::endl;
+            this->get_error_message();
             return;
         }
-        
+
         std::cout << "Server binded successfuly!" << std::endl;
-    }
+
+        getsockname(
+            this->server_socket,
+            (struct sockaddr*) &socket_address,
+            (socklen_t *) sizeof(socket_address)
+        );
+
+        char server_ip_address[16];
+        inet_ntop(AF_INET, &socket_address.sin_addr, server_ip_address, sizeof(server_ip_address));
+        
+        unsigned int server_port = ntohs(socket_address.sin_port);
+
+        std::cout << "Ip Address: " << server_ip_address << std::endl;
+        std::cout << "Port: " << server_port << std::endl; 
+	}
 };
