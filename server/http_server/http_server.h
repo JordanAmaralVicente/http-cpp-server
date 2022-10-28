@@ -21,7 +21,9 @@ namespace http {
             void show_binded_socket_info();
 
         public:
-            HTTPServer(int port, int max_connections);
+            HTTPServer(char * addr, int port, int max_connections);
+            HTTPServer(char * addr, int port);
+            HTTPServer();
             ~HTTPServer();
             
             int server_port;
@@ -32,6 +34,9 @@ namespace http {
             void create_listener();
             void accept_pending_connections();
             void close_connection();
+
+            std::string receive_messages();
+            void receive_and_show_message();
     };
 };
 

@@ -25,6 +25,7 @@ namespace http {
         std::cout << "Something went wrong" << std::endl;
         std::cout << "ERRNO: " << GETSOCKETERRNO() << std::endl;
         std::cout << "message: " << strerror(GETSOCKETERRNO()) << std::endl;
+        exit(EXIT_FAILURE);
     }
 
     void HTTPClient::setup_socket() {

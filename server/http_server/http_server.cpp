@@ -11,7 +11,7 @@
 #define GETSOCKETERRNO() (errno)
 
 namespace http {
-    HTTPServer::HTTPServer(int port, int max_connections) {
+    HTTPServer::HTTPServer(char * addr, int port, int max_connections) {
         this->server_port = port;
         this->max_connections = max_connections;
 
@@ -19,14 +19,50 @@ namespace http {
 
         sock_address.sin_family = AF_INET;
         sock_address.sin_port = htons(port);
-        sock_address.sin_addr.s_addr = inet_addr("192.168.18.83");
+        sock_address.sin_addr.s_addr = inet_addr(addr);
         memset(&(sock_address.sin_zero), '\0', 8);
 
         this->sockadd_in = sock_address;
 
         this->sockaddr = (struct sockaddr *) &sock_address;
-        this->external_sockaddr = (struct sockaddr *) &this->external_sockadd_in;
 
+        this->sockaddr_len = (socklen_t *) sizeof(this->sockaddr);
+    }
+
+    HTTPServer::HTTPServer(char * addr, int port) {
+        int default_max_connections = 10;
+
+        this->server_port = port;
+        this->max_connections = default_max_connections;
+
+        struct sockaddr_in sock_address;
+
+        sock_address.sin_family = AF_INET;
+        sock_address.sin_port = htons(port);
+        sock_address.sin_addr.s_addr = inet_addr(addr);
+        memset(&(sock_address.sin_zero), '\0', 8);
+
+        this->sockadd_in = sock_address;
+        this->sockaddr = (struct sockaddr *) &sock_address;
+        this->sockaddr_len = (socklen_t *) sizeof(this->sockaddr);
+    }
+
+    HTTPServer::HTTPServer() {
+        int default_max_connections = 10;
+        int default_port = 9091;
+
+        this->server_port = default_port;
+        this->max_connections = default_max_connections;
+
+        struct sockaddr_in sock_address;
+
+        sock_address.sin_family = AF_INET;
+        sock_address.sin_port = htons(default_port);
+        sock_address.sin_addr.s_addr = htonl(INADDR_ANY);
+        memset(&(sock_address.sin_zero), '\0', 8);
+
+        this->sockadd_in = sock_address;
+        this->sockaddr = (struct sockaddr *) &sock_address;
         this->sockaddr_len = (socklen_t *) sizeof(this->sockaddr);
     }
 
@@ -37,13 +73,15 @@ namespace http {
     void HTTPServer::get_error_message() {
         std::cout << "Something went wrong" << std::endl;
         std::cout << "ERRNO: " << GETSOCKETERRNO() << std::endl;
-        std::cout << "message: " << strerror(GETSOCKETERRNO()) << std::endl;
+        std::cout << "message: " << strerror(GETSOCKETERRNO()) << std::endl << std::endl;
+        exit(EXIT_FAILURE);
     }
 
     void HTTPServer::start_server() {
         this->server_socket = socket(AF_INET, SOCK_STREAM, 0);
 
         if (this->server_socket < 0) {
+            std::cout << "on: start_server ";
             this->get_error_message();
         }
     }
@@ -56,6 +94,7 @@ namespace http {
         );
 
         if (bind_response < 0) {
+            std::cout << "on: bind_server ";
             this->get_error_message();
             return;
         }
@@ -68,20 +107,18 @@ namespace http {
         int listerner_result = listen(this->server_socket, this->max_connections);
 
         if (listerner_result < 0) {
+            std::cout << "on: create_listener ";
             this->get_error_message();
         }
     }
 
     void HTTPServer::accept_pending_connections() {
-        socklen_t sin_size = sizeof(struct sockaddr_in);
-        
-        int acception_result = accept(
-            this->server_socket,
-            this->external_sockaddr,
-            &sin_size
-        );
+        this->enable_sockets = accept(this->server_socket, NULL, NULL);
 
-        if (acception_result < 0) {
+        this->external_sockaddr = (struct sockaddr *) &this->external_sockadd_in;
+
+        if (this->enable_sockets < 0) {
+            std::cout << "on: accept_pending_connections ";
             this->get_error_message();
             return;
         }
@@ -112,9 +149,41 @@ namespace http {
         int shutdown_result = shutdown(this->server_socket, SHUT_RDWR);
 
         if (shutdown_result < 0) {
+            std::cout << "on: close_connection ";
             this->get_error_message();
         }
 
         std::cout << "Connection closed sucessfuly" << std::endl;
+    }
+
+    std::string HTTPServer::receive_messages() {
+        int default_flag = 0;
+        char buffer[1024];
+
+        int message_status = recv(
+            this->enable_sockets,
+            buffer,
+            sizeof (buffer),
+            default_flag
+        );
+
+        if (message_status == 0) {
+            std::cout << "Connection closed by the client" << std::endl;
+            return "";
+        } else if (message_status < 0) {
+            std::cout << "on: receive_messages ";
+            this->get_error_message();
+            return "";
+        }
+
+        std::string message = static_cast<std::string>(buffer);
+
+        return message;
+    }
+
+    void HTTPServer::receive_and_show_message() {
+        std::string message = this->receive_messages();
+
+        std::cout << message << std::endl;
     }
 };
