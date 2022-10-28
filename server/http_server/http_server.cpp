@@ -14,6 +14,18 @@ namespace http {
     HTTPServer::HTTPServer(int port, int max_connections) {
         this->server_port = port;
         this->max_connections = max_connections;
+
+        struct sockaddr_in sock_address;
+
+        sock_address.sin_family = AF_INET;
+        sock_address.sin_port = htons(port);
+        sock_address.sin_addr.s_addr = inet_addr("192.168.18.83");
+        memset(&(sock_address.sin_zero), '\0', 8);
+
+        this->sockadd_in = sock_address;
+        this->sockaddr = (struct sockaddr *) &sock_address;
+
+        this->sockaddr_len = (socklen_t *) sizeof(this->sockaddr);
     }
 
     void HTTPServer::get_error_message() {
@@ -31,16 +43,9 @@ namespace http {
     }
 
     void HTTPServer::bind_server() {
-        struct sockaddr_in socket_address;
-
-        socket_address.sin_family = AF_INET;
-        socket_address.sin_port = htons(this->server_port);
-        socket_address.sin_addr.s_addr = inet_addr("192.168.18.83");
-        memset(&(socket_address.sin_zero), '\0', 8);
-
         int bind_response = bind(
             this->server_socket,
-            (struct sockaddr *)&socket_address,
+            this->sockaddr,
             sizeof(struct sockaddr)
         );
 
@@ -50,20 +55,7 @@ namespace http {
         }
 
         std::cout << "Server binded successfuly!" << std::endl;
-
-        getsockname(
-            this->server_socket,
-            (struct sockaddr*) &socket_address,
-            (socklen_t *) sizeof(socket_address)
-        );
-
-        char server_ip_address[16];
-        inet_ntop(AF_INET, &socket_address.sin_addr, server_ip_address, sizeof(server_ip_address));
-        
-        unsigned int server_port = ntohs(socket_address.sin_port);
-
-        std::cout << "Ip Address: " << server_ip_address << std::endl;
-        std::cout << "Port: " << server_port << std::endl; 
+        this->show_binded_socket_info();
 	}
 
     void HTTPServer::create_listener() {
@@ -72,5 +64,26 @@ namespace http {
         if (listerner_result < 0) {
             this->get_error_message();
         }
+    }
+
+    void HTTPServer::show_binded_socket_info() {
+        char server_ip_address[16];
+        unsigned int server_port = ntohs(this->sockadd_in.sin_port);
+
+        getsockname(
+            this->server_socket,
+            this->sockaddr,
+            this->sockaddr_len
+        );
+
+        inet_ntop(
+            AF_INET,
+            &this->sockadd_in.sin_addr,
+            server_ip_address,
+            sizeof(server_ip_address)
+        );
+        
+        std::cout << "Ip Address: " << server_ip_address << std::endl;
+        std::cout << "Port: " << server_port << std::endl; 
     }
 };
