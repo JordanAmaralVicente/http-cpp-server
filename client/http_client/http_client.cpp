@@ -51,4 +51,17 @@ namespace http {
 
         std::cout << "Connected successfully with the server!" << std::endl;
     }
+
+    void HTTPClient::send_message(char * message) {
+        int message_length = strlen(message);
+
+        int bytes_sent = send(this->socket_client, message, message_length, 0);
+
+        if (bytes_sent < 0) {
+            this->get_error_message();
+            return;
+        }
+        
+        std::cout << "Bytes sent: " << bytes_sent << std::endl;
+    }
 };

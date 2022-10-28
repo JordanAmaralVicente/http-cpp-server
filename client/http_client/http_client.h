@@ -14,6 +14,8 @@ namespace http {
             void setup_socket();
             void connect_socket();
             void get_error_message();
+
+            void send_message(char * message);
     };
 };
 
