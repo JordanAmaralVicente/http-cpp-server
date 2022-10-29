@@ -186,4 +186,33 @@ namespace http {
 
         std::cout << message << std::endl;
     }
+
+    void HTTPServer::receive_messages_runtime() {
+        int default_flag = 0;
+        char buffer[1024];
+        std::string final_message = std::string();
+        int bytes_received;
+
+        do {
+            bytes_received = recv(
+                this->enable_sockets,
+                buffer,
+                sizeof (buffer),
+                default_flag
+            );
+
+            std::cout << buffer << std::endl;
+        } while (bytes_received > 0);
+
+        if (bytes_received == 0) {
+            std::cout << "Connection closed by the client" << std::endl;
+            return;
+        } else if (bytes_received < 0) {
+            std::cout << "on: receive_messages_runtime ";
+            this->get_error_message();
+            return;
+        }
+
+        return;
+    }
 };

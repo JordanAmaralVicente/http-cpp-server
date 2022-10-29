@@ -37,6 +37,7 @@ namespace http {
 
             std::string receive_messages();
             void receive_and_show_message();
+            void receive_messages_runtime();
     };
 };
 

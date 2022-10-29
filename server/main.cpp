@@ -13,7 +13,7 @@ int main() {
 
     while (1) {
         server.accept_pending_connections();
-        server.receive_and_show_message();
+        server.receive_messages_runtime();
     }
 
     return 0;
